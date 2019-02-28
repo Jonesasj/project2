@@ -14,7 +14,8 @@ router.get('/', (req, res) => {
         //sort the messages
         //return the first 3 objects 
         var messages = dataHelper.sortMessages(fileData.messages);
-        var topMessages = messages.slice(0, );
+        var topMessages = messages.slice(0, req.body.numMessages);
+        res.json(JSON.stringify(topMessages));
     });
 });
 
