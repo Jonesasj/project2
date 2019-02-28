@@ -13,7 +13,8 @@ router.get('/', (req, res) => {
     callout(req, res, './data.json', 'GET', (req, res, fileData) => {
         //sort the messages
         //return the first 3 objects 
-        fileData = dataHelper.getFirstN(fileData.messages);
+        var messages = dataHelper.sortMessages(fileData.messages);
+        var topMessages = dataHelper.getMessages(messages);
     });
 });
 
