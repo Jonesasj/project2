@@ -5,8 +5,9 @@ var date = require('./date');
 
 module.exports = {
 
-    getMessages : function(messages) {
-        result = fileData
+    //takes an array of messages and returns the first n
+    getMessages : function(messages, n) {
+        
     },
 
     //takes an array of messages and sorts them according to their date
