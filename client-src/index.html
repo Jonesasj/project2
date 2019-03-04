@@ -2,9 +2,29 @@
 <html>
     <head>
         <title>Project2</title>
+        <script src='./eventBut.js'></script>
+        <script src='./components/voicemail/voicemail.js'></script>
+        <script src='./components/voicemailList/voicemailList.js'></script>
+        
+
     </head>
     <body>
         <h1>Test</h1>
         <button onclick="deleteVoicemails()">Delete</button>
+        <button onclick="readVoicemails()">Mark Read</button>
+        <c-voicemaillist></c-voicemailist>
     </body>
+    <script>
+        var vmList = document.querySelector('c-voicemaillist');
+        eventBus.subscribe('delete', vmList._onDelete);
+        eventBus.subscribe('read', vmList._onRead);
+
+        function deleteVoicemails() {
+            eventBus.publish('delete');
+        }
+
+        function readVoicemails() {
+            eventBus.publish('read');
+        }
+    </script>
 </html>
