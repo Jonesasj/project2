@@ -35,6 +35,11 @@
 
     class Voicemail extends HTMLElement {
 
+        static get observedAttributes() {
+            return ['disabled', 'open'];
+        }
+
+
         constructor() {
             super();
             this.attachShadow({mode: 'open'});
@@ -51,6 +56,7 @@
             }
         }
 
+
         set selected(value) {
 
             const isSelected = Boolean(value);
@@ -66,7 +72,11 @@
         }
 
         _toggleSelected() {
+
             this.selected = !this.selected;
+
+            
+            /*this.selected = !this.selected;
             this.dispatchEvent(new CustomEvent('selectVoicemail', {
                 detail: {
                     selected: this.selected,
@@ -75,7 +85,7 @@
                 bubbles: true
             }));
             console.log(this.selected);
-            console.log(this.id);
+            console.log(this.id);*/
         }
     }
 

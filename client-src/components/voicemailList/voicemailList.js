@@ -15,20 +15,31 @@
 
     class VoicemailList extends HTMLElement {
 
+
         constructor() {
             super();
             this.attachShadow({mode: 'open'});
             this.shadowRoot.appendChild(template.content.cloneNode(true));
+
             this._onDelete = this._onDelete.bind(this);
             this._onRead = this._onRead.bind(this);
             this._attachVoicemail = this._attachVoicemail.bind(this);
+
+            this.voicemailSlot = this.shadowRoot.querySelector('slot[name=voicemail]');
+            this.voicemailSlot.addEventListener('selectVoicemail', this.onSelectVoicemail);
         }
 
-        
 
         //On creation the component should get the messages from the server
         //this uses the fetch api
         connectedCallback() {
+            this._fetchVoicemail();
+            
+            //subscribe to the event bus
+            //eventBus.subscribe('delete', this._onSubscribe);
+        }
+
+        _fetchVoicemail() {
             fetch('http://localhost:3000/messages')
                 .then(this._checkStatus)
                 .then(this._json)
@@ -36,11 +47,10 @@
                 .catch(function(err) {
                     console.log('Fetch error: ', err);
                 });
-            
-            //subscribe to the event bus
-            //eventBus.subscribe('delete', this._onSubscribe);
+        }
 
-
+        onSelectVoicemail(event) {
+            console.log('pressed from the list');
         }
 
         _checkStatus(response) {
@@ -58,6 +68,7 @@
         //delete event handler
         _onDelete() {
             console.log('The delete button has been pressed');
+            this._deleteVoicemail();
         }
 
         _onRead() {
@@ -85,8 +96,20 @@
 
         }
 
+        //removes all the voicemails and makes a request for the new ones
+        _render() {
+
+        }
+
+        
+
         //makes a delete callout to the server
         _deleteVoicemail() {
+            //get the selected voicemails
+            var selectedVoicemail = document.querySelectorAll("c-voicemail[selected]");
+            selectedVoicemail.forEach(function(node) {
+                node.remove();
+            });
 
         }
     }
