@@ -23,10 +23,10 @@
                             <audio controls>
                                 <source src="test.mp3" type="audio/mpeg">
                             </audio>
-                            <p>This is a test description</p>
+                            <slot name="transcript"></slot>
                             <div>
-                                    <time>10:00</time>
-                            </div>        
+                                <time>10:00</time>
+                            </div> 
                         </div>
     `;
 
@@ -69,6 +69,19 @@
 
         get selected() {
             return this.hasAttribute('selected');
+        }
+
+        set read(value) {
+            const isRead = Boolean(value);
+            if (isRead) {
+                this.setAttribute('read', '');
+            } else {
+                this.removeAttribute('read');
+            }
+        }
+
+        get read() {
+            return this.hasAttribute('read');
         }
 
         _toggleSelected() {

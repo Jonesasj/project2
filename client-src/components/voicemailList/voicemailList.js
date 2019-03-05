@@ -22,7 +22,7 @@
             this.shadowRoot.appendChild(template.content.cloneNode(true));
 
             this._onDelete = this._onDelete.bind(this);
-            this._onRead = this._onRead.bind(this);
+            //this._onRead = this._onRead.bind(this);
             this._attachVoicemail = this._attachVoicemail.bind(this);
 
             this.voicemailSlot = this.shadowRoot.querySelector('slot[name=voicemail]');
@@ -33,17 +33,18 @@
         //On creation the component should get the messages from the server
         //this uses the fetch api
         connectedCallback() {
-            this._fetchVoicemail();
+            this._fetchVoicemail('http://localhost:3000/messages', {}, this._attachVoicemail);
+            //this._fetchVoicemail();
             
             //subscribe to the event bus
             //eventBus.subscribe('delete', this._onSubscribe);
         }
 
-        _fetchVoicemail() {
-            fetch('http://localhost:3000/messages')
+        _fetchVoicemail(url, options, handler) {
+            fetch(url)
                 .then(this._checkStatus)
                 .then(this._json)
-                .then(this._attachVoicemail)
+                .then(handler)
                 .catch(function(err) {
                     console.log('Fetch error: ', err);
                 });
@@ -71,8 +72,25 @@
             this._deleteVoicemail();
         }
 
-        _onRead() {
+        /*_onRead() {
+            var selectedVoicemail = document.querySelectorAll("c-voicemail[selected]");
+
             console.log('The read button has been pressed');
+            var url = 'http://localhost:3000/messages';
+            var options = {
+                method : 'put',
+                headers : {
+                    "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body : {
+                    job : 
+                }
+            }
+            this._readVoicemail();
+        }*/
+
+        _readVoicemail() {
+            
         }
 
 
@@ -86,6 +104,13 @@
             for(let i = 0; i < objData.length; i++) {
                 let newVoicemail = document.createElement('c-voicemail');
                 newVoicemail.setAttribute("slot", "voicemail");
+
+                let transcriptElement = document.createElement('p');
+                transcriptElement.setAttribute("slot", "transcript");
+                let transcriptText = document.createTextNode("Text inserted by the list element");
+                transcriptElement.appendChild(transcriptText);
+                newVoicemail.appendChild(transcriptElement);
+
                 this.appendChild(newVoicemail);
             }
             console.log(typeof objData);
@@ -101,7 +126,7 @@
 
         }
 
-        
+
 
         //makes a delete callout to the server
         _deleteVoicemail() {
