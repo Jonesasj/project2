@@ -6,6 +6,11 @@
                         <style>
                             :host {
                                 display: flex;
+                                font-weight: bold;
+                            }
+                            :host([read]){
+                                color: grey;
+                                font-weight: normal;
                             }
                             .flex-container {
                                 display: flex;
@@ -20,12 +25,15 @@
                         </style>
                         <div class="flex-container">
                             <input type="checkbox" name="selected">
+                            <div>
+                                <slot>Caller Unknown</slot>
+                            </div>
                             <audio controls>
                                 <source src="test.mp3" type="audio/mpeg">
                             </audio>
                             <slot name="transcript"></slot>
                             <div>
-                                <time>10:00</time>
+                                <time></time>
                             </div> 
                         </div>
     `;
@@ -36,7 +44,7 @@
     class Voicemail extends HTMLElement {
 
         static get observedAttributes() {
-            return ['disabled', 'open'];
+            return ['selected', 'read'];
         }
 
 
@@ -50,10 +58,32 @@
 
         connectedCallback() {
             this.shadowRoot.querySelector('input').addEventListener('click', this._toggleSelected);
-            if (!this.id) {
-                this.id = `voicemail-id-${voicemailCounter++}`;
-                console.log(this.id);
+
+            //enter the date
+            let timeElement = this.shadowRoot.querySelector('time');
+            let timeText = document.createTextNode(this.date);
+            timeElement.setAttribute('datetime', this.date);
+            timeElement.appendChild(timeText);
+        }
+
+        attributeChangedCallback(name, oldVal, newVal) {
+            //when selected changes set check on the checkbox fire a click event on 
+            if(name === 'selected') {
+                let checkbox = this.shadowRoot.querySelector('input');
+                if(this.selected) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false;
+                }
             }
+        }
+
+        set date(value) {
+            this.setAttribute('date', value);
+        }
+
+        get date() {
+            return this.getAttribute('date');
         }
 
 

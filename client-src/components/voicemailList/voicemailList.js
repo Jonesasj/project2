@@ -22,7 +22,7 @@
             this.shadowRoot.appendChild(template.content.cloneNode(true));
 
             this._onDelete = this._onDelete.bind(this);
-            //this._onRead = this._onRead.bind(this);
+            this._onRead = this._onRead.bind(this);
             this._attachVoicemail = this._attachVoicemail.bind(this);
 
             this.voicemailSlot = this.shadowRoot.querySelector('slot[name=voicemail]');
@@ -41,7 +41,7 @@
         }
 
         _fetchVoicemail(url, options, handler) {
-            fetch(url)
+            fetch(url, options)
                 .then(this._checkStatus)
                 .then(this._json)
                 .then(handler)
@@ -63,6 +63,7 @@
         }
 
         _json(response) {
+            console.log(response);
             return response.json();
         }
 
@@ -72,25 +73,47 @@
             this._deleteVoicemail();
         }
 
-        /*_onRead() {
+        _onRead() {
+            // check the read of the first element in the array
+            // get an array of the nodes that share this value
+            // update these attributes and update the server
+            // unselect the voicemails
             var selectedVoicemail = document.querySelectorAll("c-voicemail[selected]");
+            console.log(selectedVoicemail);
+            var toUpdate = [];
+            if(selectedVoicemail.length > 0) {
+                var read = selectedVoicemail[0].hasAttribute('read');
+            }
+            selectedVoicemail.forEach(function(node) {
+                if(node.read === read) {
+                    toUpdate.push(node.id);
+                    node.read = !node.read;
+                }
+                node.selected = !node.selected;
+            });
+            console.log(toUpdate);
+            console.log(read);
+
+
 
             console.log('The read button has been pressed');
-            var url = 'http://localhost:3000/messages';
+            let url = 'http://localhost:3000/messages';
             var options = {
-                method : 'put',
+                method : 'PUT',
                 headers : {
-                    "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    "Content-type": "application/json; charset=UTF-8"
                 },
-                body : {
-                    job : 
-                }
+                body : JSON.stringify({
+                    read : read,
+                    list : toUpdate
+                })
             }
-            this._readVoicemail();
-        }*/
+            //this._readVoicemail();
+            this._fetchVoicemail(url, options, this._readVoicemail);
+        }
 
         _readVoicemail() {
-            
+            console.log('success');
         }
 
 
@@ -104,7 +127,17 @@
             for(let i = 0; i < objData.length; i++) {
                 let newVoicemail = document.createElement('c-voicemail');
                 newVoicemail.setAttribute("slot", "voicemail");
+                newVoicemail.id = objData[i].uuid;
+                newVoicemail.read = Boolean(objData[i].seen);
+                newVoicemail.date = objData[i].date;
 
+                //caller id element
+                let callerElement = document.createElement('span');
+                let callerText = document.createTextNode(objData[i].callerid);
+                callerElement.appendChild(callerText);
+                newVoicemail.appendChild(callerElement);
+
+                //<p> element inserted into the voicemail <slot> element
                 let transcriptElement = document.createElement('p');
                 transcriptElement.setAttribute("slot", "transcript");
                 let transcriptText = document.createTextNode("Text inserted by the list element");

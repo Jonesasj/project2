@@ -4,6 +4,7 @@ var express = require('express');
 var router = express.Router();
 var callout = require('../helper/callouts');
 var dataHelper = require('../helper/dataHelper');
+var endpoint = require('../middleware/endpoint');
 
 
 //gets the list of voicemails in the inbox
@@ -25,7 +26,8 @@ router.get('/', (req, res) => {
 router.delete('/', (req, res) => {
 
     let job = req.body.job;
-    let mailIds = req.body.ids;
+    let toUpdate = req.body.toUpdate;
+    console.log(toUpdate);
     callout(req, res, '/voicemail/DeletedMessage/2046415/' + uuid, 'DELETE', (req, res, data, code) => {
         //return success or failure
         if(data.error) {
@@ -33,20 +35,26 @@ router.delete('/', (req, res) => {
         } else {
             res.send('success');
         }
-    }); 
+    });
 });
 
-router.put('/', (req, res) => {
+router.put('/', endpoint, (req, res) => {
 
-    let job = req.body.job;
-    let mailIds = req.body.ids;
-    callout(req, res, '/voicemail/' + job + '/2046415/' + uuid, 'PUT', (req, res, data, code) => {
-        if(data.error) {
-            res.send('error');
-        } else {
-            res.send('success');
-        }
-    });
+    let list = req.body.list;
+    console.log(req.body.method);
+    console.log(list);
+    
+    for(i = 0; i < list.length; i++) {
+        callout(req, res, '/voicemail/' + req.body.method + '/2046415/' + list[i], 'PUT', (req, res, data, code) => {
+            /*if(data.error) {
+                res.json({error : 'error'});
+            } else {
+                res.json({success : 'success'});
+            }*/
+            console.log('success');
+        });
+    }
+    res.json({success : true});
 
 });
 
