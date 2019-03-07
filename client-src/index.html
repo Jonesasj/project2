@@ -3,16 +3,19 @@
     <head>
         <title>Project2</title>
         <script src='./eventBut.js'></script>
+        <script src='./components/pagenumber/pagenumber.js'></script>
         <script src='./components/voicemail/voicemail.js'></script>
         <script src='./components/voicemailList/voicemailList.js'></script>
         
 
     </head>
     <body>
-        <h1>Test</h1>
+        <h1>Voicemail</h1>
         <button onclick="deleteVoicemails()">Delete</button>
         <button onclick="readVoicemails()">Mark Read</button>
-        <c-voicemaillist></c-voicemailist>
+        <c-voicemaillist pagenumber="1" itemsPerPage="7"></c-voicemaillist>
+
+
     </body>
     <script>
         var vmList = document.querySelector('c-voicemaillist');

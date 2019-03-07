@@ -4,16 +4,46 @@
     template.innerHTML = `
         <style>
             :host {
-                display: block;
+                display: grid;
+                grid-row-gap: 5px;
+                grid-template-columns: 1fr auto 1fr;
             }
-            ::slotted(c-voicemail {
-                color: blue;
+            ::slotted(*) {
+                grid-column-start: 2;
+                grid-column-end: span 1;
             }
+            .grid-item-2 {
+                grid-column-start: 2;
+                grid-column-end: span 1;
+            }
+            .nav-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 1fr;
+                justify-self: center;
+            }
+            .flex-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            
         </style>
         <slot name="voicemail"></slot>
+        <div class="grid-item-2 flex-container">
+            <p id="prev" class="nav-1"><a href="#" onclick="return false;">&lt;prev</a></p>
+            <select is="c-pageselector" id="pageselector">select a page</select>
+            <p id="next" class="nav-3"><a href="#" onclick="return false;">next&gt;</a></p>
+        </div>
     `;
 
     class VoicemailList extends HTMLElement {
+
+
+        static get observedAttributes() {
+            return['pagenumber', 'numpages'];
+        }
 
 
         constructor() {
@@ -27,17 +57,46 @@
 
             this.voicemailSlot = this.shadowRoot.querySelector('slot[name=voicemail]');
             this.voicemailSlot.addEventListener('selectVoicemail', this.onSelectVoicemail);
+
+            //bind prev and next event handlers to this element
+            this._prev = this._prev.bind(this);
+            this._next  = this._next.bind(this);
         }
 
 
         //On creation the component should get the messages from the server
         //this uses the fetch api
         connectedCallback() {
-            this._fetchVoicemail('http://localhost:3000/messages', {}, this._attachVoicemail);
+            //this._getVoicemail();
+
+            //add events listeners to the next and prev buttons
+            this.shadowRoot.getElementById('prev').addEventListener('click', this._prev);
+            this.shadowRoot.getElementById('next').addEventListener('click', this._next);
+            //this._fetchVoicemail('http://localhost:3000/messages', {}, this._attachVoicemail);
             //this._fetchVoicemail();
+            this.addEventListener('pagechange', this._updatePage);
             
             //subscribe to the event bus
             //eventBus.subscribe('delete', this._onSubscribe);
+        }
+
+        attributeChangedCallback(name, oldVal, newVal) {
+            //if the page number changes remove all the voicemail elements and fetch the new ones
+            console.log('here');
+            if(name === 'pagenumber') {
+                console.log('page number changed');
+                //this._removeVoicemail();
+                this._getVoicemail();
+
+                let pageselector = this.shadowRoot.getElementById('pageselector');
+                pageselector.pagenumber = this.pagenumber;
+            }
+
+            if(name === 'numpages') {
+                let pageselector = this.shadowRoot.getElementById('pageselector');
+                pageselector.numpages = this.numpages;
+                console.log('change number of pages');
+            }
         }
 
         _fetchVoicemail(url, options, handler) {
@@ -48,6 +107,12 @@
                 .catch(function(err) {
                     console.log('Fetch error: ', err);
                 });
+        }
+
+        _updatePage(e) {
+            console.log('page change event from the list');
+            this.pagenumber = e.detail.page;
+
         }
 
         onSelectVoicemail(event) {
@@ -118,22 +183,29 @@
 
 
         _removeVoicemail() {
-
+            var allVoicemail = document.querySelectorAll("c-voicemail");
+            allVoicemail.forEach((node) => {
+                node.remove();
+            });
         }
 
         _attachVoicemail(data) {
+            this._removeVoicemail();
             var objData = JSON.parse(data);
             console.log(objData);
-            for(let i = 0; i < objData.length; i++) {
+            console.log(objData.count);
+            this.numpages = Math.ceil(parseInt(objData.count) / parseInt(this.getAttribute('itemsPerPage')));
+            console.log(this.numpages);
+            for(let i = 0; i < objData.messages.length; i++) {
                 let newVoicemail = document.createElement('c-voicemail');
                 newVoicemail.setAttribute("slot", "voicemail");
-                newVoicemail.id = objData[i].uuid;
-                newVoicemail.read = Boolean(objData[i].seen);
-                newVoicemail.date = objData[i].date;
+                newVoicemail.id = objData.messages[i].uuid;
+                newVoicemail.read = Boolean(objData.messages[i].seen);
+                newVoicemail.date = objData.messages[i].date;
 
                 //caller id element
                 let callerElement = document.createElement('span');
-                let callerText = document.createTextNode(objData[i].callerid);
+                let callerText = document.createTextNode(objData.messages[i].callerid);
                 callerElement.appendChild(callerText);
                 newVoicemail.appendChild(callerElement);
 
@@ -146,12 +218,14 @@
 
                 this.appendChild(newVoicemail);
             }
-            console.log(typeof objData);
+            console.log(typeof objData.messages);
 
         }
 
         _getVoicemail() {
-
+            //adds the page number and the number of items per page to the url to recieve the required voicemails
+            var url = 'http://localhost:3000/messages' + '?pageNumber=' + this.pagenumber.toString() + '&itemsPerPage=' + this.itemsPerPage.toString();
+            this._fetchVoicemail(url, {}, this._attachVoicemail);
         }
 
         //removes all the voicemails and makes a request for the new ones
@@ -169,6 +243,50 @@
                 node.remove();
             });
 
+        }
+
+        _prev() {
+            if(this.pagenumber > 1) {
+                this.pagenumber = this.pagenumber - 1;
+            }
+        }
+
+        _next() {
+            if(this.pagenumber < this.numpages){
+                this.pagenumber = parseInt(this.pagenumber) + 1;
+            }
+        }
+
+        get numpages() {
+            return this.getAttribute('numpages');
+        }
+
+        set numpages(value) {
+            this.setAttribute('numpages', value);
+        }
+
+        /*get count() {
+            return getAttribute('count');
+        }
+
+        set count(value) {
+            this.setAttribute('count', value);
+        }*/
+
+        get pagenumber() {
+            return this.getAttribute('pageNumber');
+        }
+
+        set pagenumber(value) {
+            this.setAttribute('pageNumber', value);
+        }
+
+        get itemsPerPage() {
+            return this.getAttribute('itemsPerPage');
+        }
+
+        set itemsPerPage(value) {
+            this.setAttribute('itemsPerPage', value);
         }
     }
 

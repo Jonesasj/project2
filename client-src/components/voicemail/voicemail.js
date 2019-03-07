@@ -5,37 +5,44 @@
     template.innerHTML = `
                         <style>
                             :host {
-                                display: flex;
+                                display: block;
                                 font-weight: bold;
                             }
                             :host([read]){
                                 color: grey;
                                 font-weight: normal;
                             }
-                            .flex-container {
-                                display: flex;
-                                flex-direction: row;
-                                align-items: center;
-                                align-content: space-between;
-                                justify-content: space-evenly;
-                                border-style: solid;
-                                border-width: 3px;
-                                overflow: hidden;
+                            .grid-container {
+                                display: grid;
+                                grid-template-columns: 30px 70px 300px 150px 100px;
+                                grid-column-gap: 10px;
+                                border: 2px solid #000;
+                                justify-content: center;
                             }
+                            .item {
+                                justify-self: center;
+                                align-self: center;
+                            }
+
+
+
+
                         </style>
-                        <div class="flex-container">
-                            <input type="checkbox" name="selected">
-                            <div>
+                        <div class="grid-container">
+                            <input class="grid-item-a item" type="checkbox" name="selected">
+                            <div class="grid-item-b item">
                                 <slot>Caller Unknown</slot>
                             </div>
-                            <audio controls>
+                            <audio controls class="grid-item-c item">
                                 <source src="test.mp3" type="audio/mpeg">
                             </audio>
-                            <slot name="transcript"></slot>
-                            <div>
+                            <slot name="transcript" class="grid-item-d item"></slot>
+                            <div class="grid-item-e item">
                                 <time></time>
                             </div> 
                         </div>
+
+                        
     `;
 
     let voicemailCounter = 0;

@@ -10,14 +10,30 @@ var endpoint = require('../middleware/endpoint');
 //gets the list of voicemails in the inbox
 ////calls https://msp-15963.eu-west-2.aws.dev.gradwell.net:8080/voicemail/GetMessages/2046415/INBOX
 //GetMessages/mailbox/folder[?start-date=yyyy-mm-dd hh:mm:ss[&end-date=yyyy-mm-dd hh:mm:ss]]
+
+//getting the voicemail list should also return the number of voicemails
+/*
+
+    response {
+        messages: [{}, {} ...],
+        count:
+    }
+*/
 router.get('/', (req, res) => {
+    console.log(req.query);
     callout(req, res, '/voicemail/GetMessages/2046415/INBOX', 'GET', (req, res, data, code) => {
         //sort the messages
         //return the first 3 objects 
         //var messages = dataHelper.sortMessages(fileData.messages);
+        let returnData = {};
+        var start = (parseInt(req.query.pageNumber) - 1) * parseInt(req.query.itemsPerPage);
+        var end = start + parseInt(req.query.itemsPerPage);
+        console.log('start: ' + start + ', end: ' + end);
         dataHelper.sortMessages(data.messages);
-        var topMessages = data.messages.slice(0, 2); //req.body.numMessages
-        res.json(JSON.stringify(topMessages));
+        var returnMessages = data.messages.slice(start, end); //req.body.numMessages
+        returnData.messages = returnMessages;
+        returnData.count = data.messages.length;
+        res.json(JSON.stringify(returnData));
     });
 });
 
