@@ -5,6 +5,7 @@ var router = express.Router();
 var callout = require('../helper/callouts');
 var dataHelper = require('../helper/dataHelper');
 var endpoint = require('../middleware/endpoint');
+require('dotenv').config();
 
 
 //gets the list of voicemails in the inbox
@@ -19,7 +20,7 @@ var endpoint = require('../middleware/endpoint');
         count:
     }
 */
-router.get('/', (req, res) => {
+/*router.get('/', (req, res) => {
     console.log(req.query);
     callout(req, res, '/voicemail/GetMessages/2046415/INBOX', 'GET', (req, res, data, code) => {
         //sort the messages
@@ -35,6 +36,46 @@ router.get('/', (req, res) => {
         returnData.count = data.messages.length;
         res.json(JSON.stringify(returnData));
     });
+});*/
+
+router.get('/', (req, res) => {
+    console.log('promise route');
+
+    //callout wraps the request function, it returns a promise therefore is thenable
+    callout(req, '/voicemail/GetMessages/2046415/INBOX', 'GET').then((responseData) => {
+        var data = JSON.parse(responseData);
+        let returnData = {};
+        var start = (parseInt(req.query.pageNumber) - 1) * parseInt(req.query.itemsPerPage);
+        var end = start + parseInt(req.query.itemsPerPage);
+        console.log('start: ' + start + ', end: ' + end);
+        dataHelper.sortMessages(data.messages);
+        var returnMessages = data.messages.slice(start, end); //req.body.numMessages
+        returnData.messages = returnMessages;
+        returnData.count = data.messages.length;
+        res.json(JSON.stringify(returnData));
+    }).catch((error) => {
+        console.log(error);
+    });
+});
+
+router.put('/', endpoint, (req, res) => {
+
+    let promiseList = [];
+    let list = req.body.list;
+    console.log(req.body.method);
+    console.log(list);
+
+    for(i = 0; i < list.length; i++) {
+        promiseList.push(callout(req, '/voicemail/' + req.body.method + '/2046415/' + list[i], 'PUT'));
+    }
+
+    Promise.all(promiseList).then((values) => {
+        console.log(values);
+        res.json({success : true});
+    }).catch(error => {
+        console.log(error);
+    });
+
 });
 
 
@@ -54,7 +95,7 @@ router.delete('/', (req, res) => {
     });
 });
 
-router.put('/', endpoint, (req, res) => {
+/*router.put('/', endpoint, (req, res) => {
 
     let list = req.body.list;
     console.log(req.body.method);
@@ -62,19 +103,14 @@ router.put('/', endpoint, (req, res) => {
     
     for(i = 0; i < list.length; i++) {
         callout(req, res, '/voicemail/' + req.body.method + '/2046415/' + list[i], 'PUT', (req, res, data, code) => {
-            /*if(data.error) {
-                res.json({error : 'error'});
-            } else {
-                res.json({success : 'success'});
-            }*/
             console.log('success');
         });
     }
     res.json({success : true});
 
-});
+});*/
 
-router.get('/:uuid', (req, res) => {
+/*router.get('/:uuid', (req, res) => {
 
     console.log('recording request recieved');
 
@@ -87,6 +123,18 @@ router.get('/:uuid', (req, res) => {
     });
 
 
+});*/
+
+router.get('/:uuid', (req, res) => {
+
+    console.log('recording request recieved');
+
+    callout(req, '/voicemail/GetMessageRecording/2046415/' + req.params.uuid, 'GET').then((data) => {
+        console.log('promise route');
+        res.send(data);
+    }).catch(error => {
+        console.log(error);
+    });
 });
 
 module.exports = router;

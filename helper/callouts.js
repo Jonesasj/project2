@@ -18,7 +18,7 @@ require('dotenv').config();
     });
 }*/
 
-module.exports = function callouts(req, res, path, method, success) {
+/*module.exports = function callouts(req, res, path, method, success) {
 
     let reqData = JSON.stringify(req.body);
 
@@ -65,4 +65,61 @@ module.exports = function callouts(req, res, path, method, success) {
     request.write(reqData);
     request.end();
 
+}*/
+
+
+//request wrapped in a promise
+//if it returns a promise it is thenable
+
+module.exports = function calloutPromise(req, path, method) {
+
+    let reqData = JSON.stringify(req.body);
+
+    var options = {
+        encoding : 'utf8',
+        host : process.env.API_HOST,
+        port : '8080',
+        method : method,
+        headers : {
+            Authorization : 'Basic ' + Buffer.from(process.env.API_USERNAME + ':' + process.env.API_SECRET_KEY).toString('base64')
+        },
+        path : path
+    }
+
+    return new Promise((resolve, reject) => {
+        let request = https.request(options, (response) => {
+            var responseData = '';
+            console.log(`STATUS: ${response.statusCode}`);
+            console.log(`HEADERS: ${JSON.stringify(response.headers)}`);
+            response.setEncoding('utf8');
+            response.on('data', (data) => {
+                responseData += data;
+            });
+            response.on('end', () => {
+                resolve(responseData);
+            });
+        });
+
+        request.on('error', (e) => {
+            reject(e);
+        });
+        request.write(reqData);
+        request.end();
+    });
+}
+
+function calloutWrapper(req, res, path, method) {
+
+    let reqData = JSON.stringify(req.body);
+
+    var options = {
+        encoding : 'utf8',
+        host : process.env.API_HOST,
+        port : '8080',
+        method : method,
+        headers : {
+            Authorization : 'Basic ' + Buffer.from(process.env.API_USERNAME + ':' + process.env.API_SECRET_KEY).toString('base64')
+        },
+        path : path
+    }
 }
