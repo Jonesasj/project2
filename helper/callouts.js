@@ -44,10 +44,17 @@ module.exports = function callouts(req, res, path, method, success) {
         });
         response.on('end', () => {
 
-            if(!(responseData === '')) {
+            if(responseData !== '' && (response.headers['content-type'] != 'audio/x-wav; charset=UTF-8')) {
+                console.log(response.headers['content-type']);
                 var responseObject = JSON.parse(responseData);
+                success(req, res, responseObject, response.statusCode);
+            } else if (response.headers['content-type'] === 'audio/x-wav; charset=UTF-8'){
+                success(req, res, responseData, response.statusCode);
+
+            } else if (responseData === '') {
+                success(req, res, responseObject, response.statusCode);
             }
-            success(req, res, responseObject, response.statusCode);
+            
         });
 
     });

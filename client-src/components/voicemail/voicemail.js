@@ -24,17 +24,24 @@
                                 align-self: center;
                             }
 
+                            .grid-item-b {
+                                align-self: start;
+                            }
 
+                            p {
+                                padding: 0px;
+                            }
 
 
                         </style>
                         <div class="grid-container">
                             <input class="grid-item-a item" type="checkbox" name="selected">
                             <div class="grid-item-b item">
+                                <p>Called id</p>
                                 <slot>Caller Unknown</slot>
                             </div>
-                            <audio controls class="grid-item-c item">
-                                <source src="test.mp3" type="audio/mpeg">
+                            <audio controls class="grid-item-c item" id="audio" preload="none">
+                                <source type="audio/wav" id="source">
                             </audio>
                             <slot name="transcript" class="grid-item-d item"></slot>
                             <div class="grid-item-e item">
@@ -71,6 +78,12 @@
             let timeText = document.createTextNode(this.date);
             timeElement.setAttribute('datetime', this.date);
             timeElement.appendChild(timeText);
+
+            //set the source address for the audio element
+            let source = this.shadowRoot.getElementById('source');
+            source.setAttribute('src', 'http://localhost:3000/messages/' + this.id);
+            console.log(source);
+
         }
 
         attributeChangedCallback(name, oldVal, newVal) {
@@ -124,18 +137,6 @@
         _toggleSelected() {
 
             this.selected = !this.selected;
-
-            
-            /*this.selected = !this.selected;
-            this.dispatchEvent(new CustomEvent('selectVoicemail', {
-                detail: {
-                    selected: this.selected,
-                    voicemailId: this.id
-                },
-                bubbles: true
-            }));
-            console.log(this.selected);
-            console.log(this.id);*/
         }
     }
 

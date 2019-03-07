@@ -6,14 +6,24 @@
         <script src='./components/pagenumber/pagenumber.js'></script>
         <script src='./components/voicemail/voicemail.js'></script>
         <script src='./components/voicemailList/voicemailList.js'></script>
-        
+        <style>
+            .wrapper {
+                text-align: center;
+            }
+            button {
+                font-size: 20px;
 
+            }
+        </style>
     </head>
     <body>
-        <h1>Voicemail</h1>
-        <button onclick="deleteVoicemails()">Delete</button>
-        <button onclick="readVoicemails()">Mark Read</button>
-        <c-voicemaillist pagenumber="1" itemsPerPage="7"></c-voicemaillist>
+        <h1 align="center">Voicemail</h1>
+        <div class="wrapper">
+            <button onclick="deleteVoicemails()">Delete</button>
+            <button onclick="readVoicemails()">Mark Read</button>
+        </div>
+        
+        <c-voicemaillist pagenumber="1" itemsPerPage="6"></c-voicemaillist>
 
 
     </body>

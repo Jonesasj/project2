@@ -74,4 +74,19 @@ router.put('/', endpoint, (req, res) => {
 
 });
 
+router.get('/:uuid', (req, res) => {
+
+    console.log('recording request recieved');
+
+    callout(req, res, '/voicemail/GetMessageRecording/2046415/' + req.params.uuid, 'GET', (req, res, data, code) => {
+        if(!data.error) {
+            console.log('success getting recording');
+            res.send(data);
+        }
+        console.log('success');
+    });
+
+
+});
+
 module.exports = router;

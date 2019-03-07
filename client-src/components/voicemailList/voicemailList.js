@@ -55,9 +55,6 @@
             this._onRead = this._onRead.bind(this);
             this._attachVoicemail = this._attachVoicemail.bind(this);
 
-            this.voicemailSlot = this.shadowRoot.querySelector('slot[name=voicemail]');
-            this.voicemailSlot.addEventListener('selectVoicemail', this.onSelectVoicemail);
-
             //bind prev and next event handlers to this element
             this._prev = this._prev.bind(this);
             this._next  = this._next.bind(this);
@@ -72,20 +69,13 @@
             //add events listeners to the next and prev buttons
             this.shadowRoot.getElementById('prev').addEventListener('click', this._prev);
             this.shadowRoot.getElementById('next').addEventListener('click', this._next);
-            //this._fetchVoicemail('http://localhost:3000/messages', {}, this._attachVoicemail);
-            //this._fetchVoicemail();
             this.addEventListener('pagechange', this._updatePage);
-            
-            //subscribe to the event bus
-            //eventBus.subscribe('delete', this._onSubscribe);
         }
 
         attributeChangedCallback(name, oldVal, newVal) {
             //if the page number changes remove all the voicemail elements and fetch the new ones
-            console.log('here');
             if(name === 'pagenumber') {
                 console.log('page number changed');
-                //this._removeVoicemail();
                 this._getVoicemail();
 
                 let pageselector = this.shadowRoot.getElementById('pageselector');
@@ -113,10 +103,6 @@
             console.log('page change event from the list');
             this.pagenumber = e.detail.page;
 
-        }
-
-        onSelectVoicemail(event) {
-            console.log('pressed from the list');
         }
 
         _checkStatus(response) {
@@ -173,12 +159,7 @@
                     list : toUpdate
                 })
             }
-            //this._readVoicemail();
             this._fetchVoicemail(url, options, this._readVoicemail);
-        }
-
-        _readVoicemail() {
-            console.log('success');
         }
 
 
@@ -228,11 +209,6 @@
             this._fetchVoicemail(url, {}, this._attachVoicemail);
         }
 
-        //removes all the voicemails and makes a request for the new ones
-        _render() {
-
-        }
-
 
 
         //makes a delete callout to the server
@@ -264,14 +240,6 @@
         set numpages(value) {
             this.setAttribute('numpages', value);
         }
-
-        /*get count() {
-            return getAttribute('count');
-        }
-
-        set count(value) {
-            this.setAttribute('count', value);
-        }*/
 
         get pagenumber() {
             return this.getAttribute('pageNumber');

@@ -8,8 +8,6 @@
 
         constructor() {
             super();
-            //this.attachShadow({mode: 'open'});
-            //this.shadowRoot.appendChild(template.content.cloneNode(true));
             this.addEventListener('change', this._changePage);
         }
         connectedCallback() {
@@ -18,14 +16,9 @@
 
 
         attributeChangedCallback(name, oldVal, newVal) {
-            console.log('here');
             if(name === 'numpages') {
                 this._updateOptions();
             }
-        }
-
-        _listen(e) {
-            console.log(e.detail.page);
         }
 
         get numpages() {
