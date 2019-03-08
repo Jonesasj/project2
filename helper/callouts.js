@@ -71,9 +71,9 @@ require('dotenv').config();
 //request wrapped in a promise
 //if it returns a promise it is thenable
 
-module.exports = function calloutPromise(req, path, method) {
+module.exports = function(body, path, method) {
 
-    let reqData = JSON.stringify(req.body);
+    let reqData = JSON.stringify(body);
 
     var options = {
         encoding : 'utf8',
@@ -106,20 +106,4 @@ module.exports = function calloutPromise(req, path, method) {
         request.write(reqData);
         request.end();
     });
-}
-
-function calloutWrapper(req, res, path, method) {
-
-    let reqData = JSON.stringify(req.body);
-
-    var options = {
-        encoding : 'utf8',
-        host : process.env.API_HOST,
-        port : '8080',
-        method : method,
-        headers : {
-            Authorization : 'Basic ' + Buffer.from(process.env.API_USERNAME + ':' + process.env.API_SECRET_KEY).toString('base64')
-        },
-        path : path
-    }
 }

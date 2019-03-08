@@ -20,29 +20,12 @@ require('dotenv').config();
         count:
     }
 */
-/*router.get('/', (req, res) => {
-    console.log(req.query);
-    callout(req, res, '/voicemail/GetMessages/2046415/INBOX', 'GET', (req, res, data, code) => {
-        //sort the messages
-        //return the first 3 objects 
-        //var messages = dataHelper.sortMessages(fileData.messages);
-        let returnData = {};
-        var start = (parseInt(req.query.pageNumber) - 1) * parseInt(req.query.itemsPerPage);
-        var end = start + parseInt(req.query.itemsPerPage);
-        console.log('start: ' + start + ', end: ' + end);
-        dataHelper.sortMessages(data.messages);
-        var returnMessages = data.messages.slice(start, end); //req.body.numMessages
-        returnData.messages = returnMessages;
-        returnData.count = data.messages.length;
-        res.json(JSON.stringify(returnData));
-    });
-});*/
 
 router.get('/', (req, res) => {
     console.log('promise route');
 
     //callout wraps the request function, it returns a promise therefore is thenable
-    callout(req, '/voicemail/GetMessages/2046415/INBOX', 'GET').then((responseData) => {
+    callout(req.body, '/voicemail/GetMessages/2046415/INBOX', 'GET').then((responseData) => {
         var data = JSON.parse(responseData);
         let returnData = {};
         var start = (parseInt(req.query.pageNumber) - 1) * parseInt(req.query.itemsPerPage);
@@ -66,7 +49,7 @@ router.put('/', endpoint, (req, res) => {
     console.log(list);
 
     for(i = 0; i < list.length; i++) {
-        promiseList.push(callout(req, '/voicemail/' + req.body.method + '/2046415/' + list[i], 'PUT'));
+        promiseList.push(callout(req.body, '/voicemail/' + req.body.method + '/2046415/' + list[i], 'PUT'));
     }
 
     Promise.all(promiseList).then((values) => {
@@ -75,7 +58,6 @@ router.put('/', endpoint, (req, res) => {
     }).catch(error => {
         console.log(error);
     });
-
 });
 
 
@@ -85,7 +67,7 @@ router.delete('/', (req, res) => {
     let job = req.body.job;
     let toUpdate = req.body.toUpdate;
     console.log(toUpdate);
-    callout(req, res, '/voicemail/DeletedMessage/2046415/' + uuid, 'DELETE', (req, res, data, code) => {
+    callout(req.body, res, '/voicemail/DeletedMessage/2046415/' + uuid, 'DELETE', (req, res, data, code) => {
         //return success or failure
         if(data.error) {
             res.send('error');
@@ -95,41 +77,11 @@ router.delete('/', (req, res) => {
     });
 });
 
-/*router.put('/', endpoint, (req, res) => {
-
-    let list = req.body.list;
-    console.log(req.body.method);
-    console.log(list);
-    
-    for(i = 0; i < list.length; i++) {
-        callout(req, res, '/voicemail/' + req.body.method + '/2046415/' + list[i], 'PUT', (req, res, data, code) => {
-            console.log('success');
-        });
-    }
-    res.json({success : true});
-
-});*/
-
-/*router.get('/:uuid', (req, res) => {
-
-    console.log('recording request recieved');
-
-    callout(req, res, '/voicemail/GetMessageRecording/2046415/' + req.params.uuid, 'GET', (req, res, data, code) => {
-        if(!data.error) {
-            console.log('success getting recording');
-            res.send(data);
-        }
-        console.log('success');
-    });
-
-
-});*/
-
 router.get('/:uuid', (req, res) => {
 
     console.log('recording request recieved');
 
-    callout(req, '/voicemail/GetMessageRecording/2046415/' + req.params.uuid, 'GET').then((data) => {
+    callout(req.body, '/voicemail/GetMessageRecording/2046415/' + req.params.uuid, 'GET').then((data) => {
         console.log('promise route');
         res.send(data);
     }).catch(error => {
